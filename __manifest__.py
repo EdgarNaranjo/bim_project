@@ -36,7 +36,6 @@
     'support': 'devtodoo@gmail.com',
     'depends': [
         'web',
-        'sale',
         'sale_management',
         'project',
         'calendar',
@@ -45,7 +44,9 @@
         'mrp',
         'documents',
         'note',
-        'board'
+        'board',
+        'planning',
+        'project_forecast'
     ],
     'data': [
         # 'views/res_groups_views.xml',

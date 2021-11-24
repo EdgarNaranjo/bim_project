@@ -16,10 +16,15 @@
             <field name="domain">[('is_bim','=',True)]</field>
 		</record>
 
+        <record model="ir.actions.act_window" id="action_bim_project">
+			<field name="name">Project</field>
+			<field name="res_model">project.project</field>
+
+		</record>
 
         <menuitem id="menu_bim_project_root" name="BIM Project" sequence="10" web_icon="bim_project,static/description/icon.png"/>
-        <menuitem id="menu_bim_project_work" name="Works" sequence="1" parent="menu_bim_project_root"/>
-        <menuitem id="menu_bim_project_work00" name="Works" sequence="1" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_work" name="Project" sequence="1" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_work00" name="Project" sequence="1" parent="menu_bim_project_work" action="action_bim_project"/>
         <menuitem id="menu_bim_project_setting" name="Settings" sequence="999" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_setting00" name="Users" sequence="998" parent="menu_bim_project_setting" action="action_bim_res_users"/>
         <menuitem id="menu_bim_project_setting01" name="Roles" sequence="999" parent="menu_bim_project_setting" action="action_bim_res_groups"/>
