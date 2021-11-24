@@ -22,7 +22,7 @@
 
 {
     'name': 'BIM Project',
-    'version': '14.0.0.0.0',
+    'version': '14.0.0.1.0',
     'category': 'Project Management',
     'summary': """BIM Project Management.""",
     'description': """BIM Project Management: Quotations, Bill of Materials, Projects, Workspaces.""",
