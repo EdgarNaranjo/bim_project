@@ -20,11 +20,11 @@
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <div name="button_box" position="inside">
+                <xpath expr="//button[@icon='fa-users']" position="after">
                     <button class="oe_stat_button" name="attachment_tree_view" type="object" icon="fa-file-text-o">
                         <field string="Documents" name="doc_count" widget="statinfo"/>
                     </button>
-                </div>
+                </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <span class="o_form_label o_td_label" name="address_name">Address</span>
                     <div class="o_address_format">
@@ -35,12 +35,23 @@
                         <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
                     </div>
                 </xpath>
+                <xpath expr="//button[@icon='fa-check-square-o']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//button[@icon='fa-area-chart']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
             </field>
         </record>
 
         <record model="ir.actions.act_window" id="action_bim_project">
 			<field name="name">Project</field>
 			<field name="res_model">project.project</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('project.view_project')}),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('project.view_project_kanban')})]"/>
+            <field name="search_view_id" ref="project.view_project_project_filter"/>
 		</record>
 
         <record model="ir.actions.act_window" id="action_bim_project_project_stage">
@@ -63,19 +74,28 @@
 			<field name="res_model">mail.activity.type</field>
 		</record>
 
+        <record id="project_config_settings_bim_action" model="ir.actions.act_window">
+            <field name="name">Settings</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'project', 'bin_size': False}</field>
+        </record>
+
         <menuitem id="menu_bim_project_root" name="BIM Project" sequence="10" web_icon="bim_project,static/description/icon.png"/>
         <menuitem id="menu_bim_project_work" name="Project" sequence="1" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_work00" name="Project" sequence="1" parent="menu_bim_project_work" action="action_bim_project"/>
 
         <menuitem id="menu_bim_project_roles" name="Roles/Users" sequence="998" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_roles00" name="Users" sequence="998" parent="menu_bim_project_roles" action="action_bim_res_users"/>
-        <menuitem id="menu_bim_project_roles01" name="Roles" sequence="999" parent="menu_bim_project_roles" action="action_bim_res_groups"/>
+        <menuitem id="menu_bim_project_roles01" name="Roles" sequence="999" parent="menu_bim_project_roles" action="action_bim_res_groups" groups="base.group_system"/>
 
         <menuitem id="menu_bim_project_setting" name="Settings" sequence="999" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_setting00" name="Project Stage" sequence="996" parent="menu_bim_project_setting" action="action_bim_project_project_stage"/>
         <menuitem id="menu_bim_project_setting01" name="Task Stage" sequence="997" parent="menu_bim_project_setting" action="action_bim_project_task_type"/>
         <menuitem id="menu_bim_project_setting02" name="Project Tags" sequence="998" parent="menu_bim_project_setting" action="action_bim_project_tags"/>
         <menuitem id="menu_bim_project_setting03" name="Activity Types" sequence="999" parent="menu_bim_project_setting" action="action_bim_mail_activity_type"/>
-
+        <menuitem id="menu_bim_project_setting04" name="Settings" sequence="1" parent="menu_bim_project_setting" action="project_config_settings_bim_action"/>
     </data>
 </odoo>
