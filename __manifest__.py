@@ -46,7 +46,6 @@
         'note',
         'board',
         'planning',
-        'project_forecast'
     ],
     'data': [
         # 'views/res_groups_views.xml',
