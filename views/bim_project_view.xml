@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-
         <record model="ir.actions.act_window" id="action_bim_res_users">
 			<field name="name">Users</field>
 			<field name="res_model">res.users</field>
@@ -16,10 +15,22 @@
             <field name="domain">[('is_bim','=',True)]</field>
 		</record>
 
+        <record model="ir.ui.view" id="project_project_inherit_bom_form">
+            <field name="name">project.project.inherit.bom.form</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <div name="button_box" position="inside">
+                    <button class="oe_stat_button" name="attachment_tree_view" type="object" icon="fa-file-text-o">
+                        <field string="Documents" name="doc_count" widget="statinfo"/>
+                    </button>
+                </div>
+            </field>
+        </record>
+
         <record model="ir.actions.act_window" id="action_bim_project">
 			<field name="name">Project</field>
 			<field name="res_model">project.project</field>
-
 		</record>
 
         <menuitem id="menu_bim_project_root" name="BIM Project" sequence="10" web_icon="bim_project,static/description/icon.png"/>
