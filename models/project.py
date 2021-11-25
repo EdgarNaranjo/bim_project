@@ -4,7 +4,7 @@ from odoo import models, fields, exceptions, api, _
 
 
 class Project(models.Model):
-    _name = "project.project"
+    _inherit = "project.project"
 
     doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of documents attached")
     street = fields.Char()
