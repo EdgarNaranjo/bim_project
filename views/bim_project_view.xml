@@ -6,7 +6,13 @@
 			<field name="res_model">res.users</field>
             <field name="context">{'default_is_bim': True}</field>
             <field name="domain">[('is_bim','=',True)]</field>
-		</record>
+            <field name="view_ids"
+                   eval="[(5, 0, 0),
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('base.view_users_tree')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('base.view_users_form')})]"/>
+            <field name="search_view_id" ref="base.view_users_search"/>
+            <field name="help">Create and manage users that will connect to the system. Users can be deactivated should there be a period of time during which they will/should not connect to the system. You can assign them groups in order to give them specific access to the applications they need to use in the system.</field>
+        </record>
 
         <record model="ir.actions.act_window" id="action_bim_res_groups">
 			<field name="name">Roles</field>
@@ -41,22 +47,127 @@
                 <xpath expr="//button[@icon='fa-area-chart']" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </xpath>
+                <xpath expr="//field[@name='label_tasks']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="attributes">
+                    <attribute name="string">Responsible</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date_start']" position="attributes">
+                    <attribute name="required">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date']" position="attributes">
+                    <attribute name="required">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="amount_total" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                </xpath>
             </field>
         </record>
 
-        <record model="ir.actions.act_window" id="action_bim_project">
-			<field name="name">Project</field>
-			<field name="res_model">project.project</field>
-            <field name="view_mode">tree,kanban,form</field>
-            <field name="view_ids" eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'tree', 'view_id': ref('project.view_project')}),
-                (0, 0, {'view_mode': 'kanban', 'view_id': ref('project.view_project_kanban')})]"/>
+        <record model="ir.ui.view" id="project_project_sale_inherit_bom_form">
+            <field name="name">project.project.sale.inherit.bom.form</field>
+            <field name="inherit_id" ref="sale_project.view_edit_project_inherit_form"/>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@icon='fa-dollar']" position="after">
+                    <button class="oe_stat_button" type="object" name="quotation_project" icon="fa-dollar">
+                        <field string="Quotations" name="count_sale" widget="statinfo"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" name="schedule_meeting" icon="fa-calendar">
+                        <field string="Meetings" name="count_meeting" widget="statinfo"/>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="project_project_inherit_bom_tree">
+            <field name="name">project.project.inherit.bom.tree</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='last_update_status']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="attributes">
+                    <attribute name="string">Responsible</attribute>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="state_id"/>
+                    <field name="country_id"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_bim_project" model="ir.actions.act_window">
+            <field name="name">Projects</field>
+            <field name="res_model">project.project</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="view_id" ref="project.view_project_kanban"/>
             <field name="search_view_id" ref="project.view_project_project_filter"/>
-		</record>
+            <field name="target">main</field>
+            <field name="context">{'search_default_groupby_stage': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No projects found. Let's create one!
+                </p><p>
+                    Projects regroup tasks on the same topic, and each has its dashboard.
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="project_project_inherit_bom_kanban">
+            <field name="name">project.project.inherit.bom.kanban</field>
+            <field name="inherit_id" ref="project.view_project_kanban"/>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <xpath expr="//span[@class='o_text_overflow']" position="replace">
+                    <a t-if="widget.editable" type="edit">
+                        <span class="o_text_overflow" style="font-size: 14px;"><t t-esc="record.name.value"/></span>
+                    </a>
+                    <br/>
+                </xpath>
+                <xpath expr="//field[@name='tag_ids']" position="before">
+                    <field name="amount_total"/>
+                    <field name="currency_id"/>
+                </xpath>
+                <xpath expr="//field[@widget='many2many_tags']" position="before">
+                    <field name="amount_total" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                </xpath>
+                <xpath expr="//a[2]" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_view_bim_all_task" model="ir.actions.act_window">
+            <field name="name">Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_mode">kanban,tree,form,calendar,pivot,graph,activity</field>
+            <field name="context">{'search_default_my_tasks': 1, 'search_default_personal_stage': 1, 'all_task': 0}</field>
+            <field name="search_view_id" ref="project.view_task_search_form_extended"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No tasks found. Let's create one!
+                </p><p>
+                     To get things done, use activities and status on tasks.<br/>
+                    Chat in real-time or by email to collaborate efficiently.
+                </p>
+            </field>
+        </record>
 
         <record model="ir.actions.act_window" id="action_bim_project_project_stage">
-			<field name="name">Project Stage</field>
-			<field name="res_model">project.project.stage</field>
+			<field name="name">Project Stages</field>
+            <field name="res_model">project.project.stage</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                  No stages found. Let's create one!
+                </p><p>
+                  Track the progress of your projects from their creation to their closing.
+                </p>
+            </field>
 		</record>
 
         <record model="ir.actions.act_window" id="action_bim_project_task_type">
@@ -83,19 +194,164 @@
             <field name="context">{'module' : 'project', 'bin_size': False}</field>
         </record>
 
+        <record id="project_config_settings_crm_team" model="ir.actions.act_window">
+            <field name="name">Sales Team</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">crm.team</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="action_quotations_bim_sale" model="ir.actions.act_window">
+            <field name="name">Quotations</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_id" ref="sale.view_quotation_tree_with_onboarding"/>
+            <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
+            <field name="search_view_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+            <field name="context">{'search_default_my_quotation': 1}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a new quotation, the first step of a new sale!
+              </p><p>
+                Once the quotation is confirmed by the customer, it becomes a sales order.<br/> You will be able to create an invoice and collect the payment.
+              </p>
+            </field>
+        </record>
+
+        <record id="action_sale_config_bim_settings" model="ir.actions.act_window">
+            <field name="name">Settings</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'sale_management', 'bin_size': False}</field>
+        </record>
+
+        <record id="action_bim_partner_customer" model="ir.actions.act_window">
+            <field name="name">Customer</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="domain">[('customer_rank','&gt;', 0)]</field>
+            <field name="context">{'default_customer_rank': 1}</field>
+        </record>
+
+        <record id="action_bim_partner_supplier" model="ir.actions.act_window">
+            <field name="name">Supplier</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="domain">[('supplier_rank','&gt;', 0)]</field>
+            <field name="context">{'default_supplier_rank': 1}</field>
+        </record>
+
+        <record id="action_quotations_bim_purchase" model="ir.actions.act_window">
+            <field name="name">Purchase Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_id" ref="purchase.purchase_order_kpis_tree"/>
+            <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
+            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                No request for quotation found. Let's create one!
+              </p><p>
+                Requests for quotation are documents that will be sent to your suppliers to request prices for different products you consider buying.
+                Once an agreement has been found with the supplier, they will be confirmed and turned into purchase orders.
+              </p>
+            </field>
+        </record>
+
+         <record id="action_purchase_bim_configuration" model="ir.actions.act_window">
+            <field name="name">Settings</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'purchase', 'bin_size': False}</field>
+        </record>
+
+        <record id="action_document_bim_space" model="ir.actions.act_window">
+            <field name="name">EDC</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">documents.document</field>
+            <field name="view_mode">kanban,tree</field>
+        </record>
+
+        <record id="action_document_bim_workspace" model="ir.actions.act_window">
+            <field name="name">Workspaces</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">documents.folder</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="action_document_bim_tags" model="ir.actions.act_window">
+            <field name="name">Tags</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">documents.facet</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="action_document_bim_spreadsheet_template" model="ir.actions.act_window">
+            <field name="name">Spreadsheet template</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">spreadsheet.template</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="action_document_bim_workflow_rule" model="ir.actions.act_window">
+            <field name="name">Actions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">documents.workflow.rule</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="action_document_bim_share" model="ir.actions.act_window">
+            <field name="name">Share links</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">documents.share</field>
+            <field name="view_mode">tree</field>
+        </record>
+
         <menuitem id="menu_bim_project_root" name="BIM Project" sequence="10" web_icon="bim_project,static/description/icon.png"/>
         <menuitem id="menu_bim_project_work" name="Project" sequence="1" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_work00" name="Project" sequence="1" parent="menu_bim_project_work" action="action_bim_project"/>
+        <menuitem id="menu_bim_project_work01" name="Tasks" sequence="2" parent="menu_bim_project_work" action="action_view_bim_all_task"/>
+
+        <menuitem id="menu_bim_project_sale" name="Quotations" sequence="2" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_sale00" name="Quotations" sequence="1" parent="menu_bim_project_sale" action="action_quotations_bim_sale"/>
+        <menuitem id="menu_bim_project_sale01" name="Customers" sequence="2" parent="menu_bim_project_sale" action="action_bim_partner_customer"/>
+
+        <menuitem id="menu_bim_project_purchase" name="Purchases" sequence="3" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_purchase00" name="Purchases" sequence="1" parent="menu_bim_project_purchase" action="action_quotations_bim_purchase"/>
+        <menuitem id="menu_bim_project_purchase01" name="Suppliers" sequence="2" parent="menu_bim_project_purchase" action="action_bim_partner_supplier"/>
+
+        <menuitem id="menu_bim_project_materials" name="Catalogs" sequence="4" parent="menu_bim_project_root"/>
+
+
+        <menuitem id="menu_bim_project_edc" name="EDC" sequence="5" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_edc00" name="EDC" sequence="1" parent="menu_bim_project_edc" action="action_document_bim_space"/>
+        <menuitem id="menu_bim_project_edc01" name="Workspaces" sequence="2" parent="menu_bim_project_edc" action="action_document_bim_workspace"/>
+        <menuitem id="menu_bim_project_edc02" name="Tags" sequence="3" parent="menu_bim_project_edc" action="action_document_bim_tags"/>
+        <menuitem id="menu_bim_project_edc03" name="Actions" sequence="4" parent="menu_bim_project_edc" action="action_document_bim_workflow_rule"/>
+        <menuitem id="menu_bim_project_edc04" name="Share links" sequence="5" parent="menu_bim_project_edc" action="action_document_bim_share"/>
+        <menuitem id="menu_bim_project_edc05" name="Spreadsheet template" sequence="6" parent="menu_bim_project_edc" action="action_document_bim_spreadsheet_template"/>
 
         <menuitem id="menu_bim_project_roles" name="Roles/Users" sequence="998" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_roles00" name="Users" sequence="998" parent="menu_bim_project_roles" action="action_bim_res_users"/>
         <menuitem id="menu_bim_project_roles01" name="Roles" sequence="999" parent="menu_bim_project_roles" action="action_bim_res_groups" groups="base.group_system"/>
 
         <menuitem id="menu_bim_project_setting" name="Settings" sequence="999" parent="menu_bim_project_root"/>
-        <menuitem id="menu_bim_project_setting00" name="Project Stage" sequence="996" parent="menu_bim_project_setting" action="action_bim_project_project_stage"/>
-        <menuitem id="menu_bim_project_setting01" name="Task Stage" sequence="997" parent="menu_bim_project_setting" action="action_bim_project_task_type"/>
-        <menuitem id="menu_bim_project_setting02" name="Project Tags" sequence="998" parent="menu_bim_project_setting" action="action_bim_project_tags"/>
-        <menuitem id="menu_bim_project_setting03" name="Activity Types" sequence="999" parent="menu_bim_project_setting" action="action_bim_mail_activity_type"/>
-        <menuitem id="menu_bim_project_setting04" name="Settings" sequence="1" parent="menu_bim_project_setting" action="project_config_settings_bim_action"/>
+        <menuitem id="menu_bim_project_setting1" name="Project" sequence="1" parent="menu_bim_project_setting"/>
+        <menuitem id="menu_bim_project_setting2" name="Quotations" sequence="2" parent="menu_bim_project_setting"/>
+        <menuitem id="menu_bim_project_setting3" name="Purchases" sequence="3" parent="menu_bim_project_setting"/>
+        <menuitem id="menu_bim_project_setting104" name="Settings" sequence="1" parent="menu_bim_project_setting1" action="project_config_settings_bim_action"/>
+        <menuitem id="menu_bim_project_setting100" name="Project Stage" sequence="2" parent="menu_bim_project_setting1" action="action_bim_project_project_stage"/>
+        <menuitem id="menu_bim_project_setting101" name="Task Stage" sequence="3" parent="menu_bim_project_setting1" action="action_bim_project_task_type"/>
+        <menuitem id="menu_bim_project_setting102" name="Project Tags" sequence="4" parent="menu_bim_project_setting1" action="action_bim_project_tags"/>
+        <menuitem id="menu_bim_project_setting103" name="Activity Types" sequence="5" parent="menu_bim_project_setting1" action="action_bim_mail_activity_type"/>
+        <menuitem id="menu_bim_project_setting200" name="Settings" sequence="1" parent="menu_bim_project_setting2" action="action_sale_config_bim_settings"/>
+        <menuitem id="menu_bim_project_setting201" name="Sales Team" sequence="2" parent="menu_bim_project_setting2" action="project_config_settings_crm_team"/>
+        <menuitem id="menu_bim_project_setting300" name="Settings" sequence="1" parent="menu_bim_project_setting3" action="action_purchase_bim_configuration"/>
     </data>
 </odoo>
