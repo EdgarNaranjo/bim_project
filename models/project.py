@@ -17,13 +17,30 @@ class Project(models.Model):
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict')
     count_sale = fields.Integer('Count quotation', compute='_calc_count_sale')
     count_meeting = fields.Integer('Count meeting', compute='_calc_count_meeting')
+    count_purchase = fields.Integer('Count purchase', compute='_calc_count_purchase')
+    count_picking = fields.Integer('Count picking', compute='_calc_count_picking')
     currency_id = fields.Many2one('res.currency', compute='_get_company_currency', readonly=True, string="Currency", help='Utility field to express amount currency')
     amount_total = fields.Float('Amount Total', compute='_call_amount_sale_project')
+    date_awarded = fields.Date('Date awarded')
+
+    def _calc_count_picking(self):
+        for obj_proj in self:
+            obj_picking_ids = self.env['stock.picking'].search([('project_id', '=', obj_proj.id), ('picking_type_id.code', '=', 'outgoing')])
+            obj_proj.count_picking = len(obj_picking_ids) if obj_picking_ids else 0
+
+    def _calc_count_purchase(self):
+        for obj_proj in self:
+            obj_purchase_ids = self.env['purchase.order'].search([('project_id', '=', obj_proj.id)])
+            obj_proj.count_purchase = len(obj_purchase_ids) if obj_purchase_ids else 0
 
     def _call_amount_sale_project(self):
         for record in self:
+            sum_val = 0
             obj_sale_ids = self.env['sale.order'].search([('project_id', '=', record.id)])
-            record.amount_total = [obj_sale.amount_total for obj_sale in obj_sale_ids if obj_sale_ids][0] if obj_sale_ids else 0
+            if obj_sale_ids:
+                for obj_sale in obj_sale_ids:
+                    sum_val += obj_sale.amount_total
+            record.amount_total = sum_val
 
     def _calc_count_sale(self):
         for obj_proj in self:
@@ -66,5 +83,24 @@ class Project(models.Model):
             'context': ({'default_project_id': self.id})
         }
 
+    def purchase_project(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'RFQ',
+            'res_model': 'purchase.order',
+            'view_mode': 'tree,form',
+            'domain': [('project_id', '=', self.id)],
+            'context': ({'default_project_id': self.id})
+        }
+
+    def picking_project(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Delivery',
+            'res_model': 'stock.picking',
+            'view_mode': 'tree,form',
+            'domain': [('picking_type_id.code', '=', 'outgoing'), ('project_id', '=', self.id)],
+            'context': ({'default_project_id': self.id})
+        }
 
 

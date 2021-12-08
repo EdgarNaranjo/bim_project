@@ -26,9 +26,18 @@
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
+                <xpath expr="//button[@icon='fa-users']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
                 <xpath expr="//button[@icon='fa-users']" position="after">
                     <button class="oe_stat_button" name="attachment_tree_view" type="object" icon="fa-file-text-o">
                         <field string="Documents" name="doc_count" widget="statinfo"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" name="purchase_project"  icon="fa-credit-card">
+                        <field string="RFQs" name="count_purchase" widget="statinfo"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" name="picking_project"  icon="fa-truck">
+                        <field string="Delivery" name="count_picking" widget="statinfo"/>
                     </button>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
@@ -52,6 +61,9 @@
                 </xpath>
                 <xpath expr="//field[@name='user_id']" position="attributes">
                     <attribute name="string">Responsible</attribute>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="date_awarded" required="True"/>
                 </xpath>
                 <xpath expr="//field[@name='date_start']" position="attributes">
                     <attribute name="required">True</attribute>
@@ -81,6 +93,28 @@
             </field>
         </record>
 
+        <record id="project_project_inherit_billable_bim_form" model="ir.ui.view">
+            <field name="name">project.project.inherit.billable.bim.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="sale_timesheet.project_project_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_billable_time_button']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="project_project_inherit_invoice2_bim_form" model="ir.ui.view">
+            <field name="name">project.project.inherit.invoice2.bim.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project_timesheet_forecast_sale.project_project_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='open_timesheets_planning_report']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="project_project_inherit_bom_tree">
             <field name="name">project.project.inherit.bom.tree</field>
             <field name="inherit_id" ref="project.view_project"/>
@@ -103,7 +137,7 @@
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
             <field name="domain">[]</field>
-            <field name="view_mode">kanban,form</field>
+            <field name="view_mode">kanban,tree,form</field>
             <field name="view_id" ref="project.view_project_kanban"/>
             <field name="search_view_id" ref="project.view_project_project_filter"/>
             <field name="target">main</field>
@@ -117,8 +151,8 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="project_project_inherit_bom_kanban">
-            <field name="name">project.project.inherit.bom.kanban</field>
+        <record model="ir.ui.view" id="project_project_inherit_bim_kanban">
+            <field name="name">project.project.inherit.bim.kanban</field>
             <field name="inherit_id" ref="project.view_project_kanban"/>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
@@ -282,14 +316,14 @@
             <field name="name">Workspaces</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">documents.folder</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,form</field>
         </record>
 
         <record id="action_document_bim_tags" model="ir.actions.act_window">
             <field name="name">Tags</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">documents.facet</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,form</field>
         </record>
 
         <record id="action_document_bim_spreadsheet_template" model="ir.actions.act_window">
@@ -303,7 +337,7 @@
             <field name="name">Actions</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">documents.workflow.rule</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,form</field>
         </record>
 
         <record id="action_document_bim_share" model="ir.actions.act_window">
@@ -313,7 +347,76 @@
             <field name="view_mode">tree</field>
         </record>
 
-        <menuitem id="menu_bim_project_root" name="BIM Project" sequence="10" web_icon="bim_project,static/description/icon.png"/>
+        <record id="action_picking_bim_all" model="ir.actions.act_window">
+            <field name="name">Transfers</field>
+            <field name="res_model">stock.picking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,kanban,form,calendar</field>
+            <field name="domain"></field>
+            <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0]}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No transfer found. Let's create one!
+                </p><p>
+                    Transfers allow you to move products from one location to another.
+                </p>
+            </field>
+        </record>
+
+        <record id="product_template_action_bim" model="ir.actions.act_window">
+            <field name="name">Materials</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.template</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="search_view_id" ref="stock.product_template_search_form_view_stock"/>
+            <field name="context">{"search_default_consumable": 1, 'default_detailed_type': 'product'}</field>
+            <field name="domain">[('detailed_type','!=','service')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No materials found. Let's create one!
+                </p><p>
+                    Track your stock quantities by creating storable materials.
+                </p>
+            </field>
+        </record>
+
+        <record id="stock_product_normal_bim_action" model="ir.actions.act_window">
+            <field name="name">Material Variants</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="search_view_id" ref="stock.stock_product_search_form_view"/>
+            <field name="context">{"search_default_consumable": 1, 'default_detailed_type': 'product'}</field>
+            <field name="domain">[('detailed_type','!=','service')]</field>
+        </record>
+
+        <record id="product_manpower_action_bim" model="ir.actions.act_window">
+            <field name="name">Manpower</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.template</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="search_view_id" ref="stock.product_template_search_form_view_stock"/>
+            <field name="context">{"search_default_service": 1, 'default_detailed_type': 'service'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No manpower found. Let's create one!
+                </p>
+            </field>
+            <field name="domain">[('detailed_type','=','service')]</field>
+        </record>
+
+        <record id="stock_product_equipment_bim_action" model="ir.actions.act_window">
+            <field name="name">Equipments</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="search_view_id" ref="stock.stock_product_search_form_view"/>
+            <field name="context">{"search_default_consumable": 1, 'default_detailed_type': 'product'}</field>
+            <field name="domain">[('detailed_type','!=','service')]</field>
+        </record>
+
+        <menuitem id="menu_bim_project_root" name="BIM Construction" sequence="10" web_icon="bim_project,static/description/icon.png"/>
         <menuitem id="menu_bim_project_work" name="Project" sequence="1" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_work00" name="Project" sequence="1" parent="menu_bim_project_work" action="action_bim_project"/>
         <menuitem id="menu_bim_project_work01" name="Tasks" sequence="2" parent="menu_bim_project_work" action="action_view_bim_all_task"/>
@@ -326,8 +429,21 @@
         <menuitem id="menu_bim_project_purchase00" name="Purchases" sequence="1" parent="menu_bim_project_purchase" action="action_quotations_bim_purchase"/>
         <menuitem id="menu_bim_project_purchase01" name="Suppliers" sequence="2" parent="menu_bim_project_purchase" action="action_bim_partner_supplier"/>
 
-        <menuitem id="menu_bim_project_materials" name="Catalogs" sequence="4" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_inventory" name="Inventory" sequence="4" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_inventory00" name="Transfers" sequence="1" parent="menu_bim_project_inventory" action="action_picking_bim_all"/>
+        <menuitem id="menu_bim_project_inventory01" name="Replenishment" sequence="2" parent="menu_bim_project_inventory" action="stock.action_replenishment"/>
+        <menuitem id="menu_bim_project_inventory02" name="Inventory Adjustments" sequence="3" parent="menu_bim_project_inventory" action="stock.action_view_inventory_tree"/>
+        <menuitem id="menu_bim_project_inventory03" name="Scrap Orders" sequence="4" parent="menu_bim_project_inventory" action="stock.action_stock_scrap"/>
+        <menuitem id="menu_bim_project_inventory04" name="Run Scheduler" sequence="5" parent="menu_bim_project_inventory" action="stock.action_procurement_compute"/>
+        <menuitem id="menu_bim_project_inventory05" name="Inventory Valuation" sequence="6" parent="menu_bim_project_inventory" action="stock_account.stock_valuation_layer_action"/>
+        <menuitem id="menu_bim_project_inventory06" name="Stock Moves" sequence="7" parent="menu_bim_project_inventory" action="stock.stock_move_action"/>
 
+        <menuitem id="menu_bim_project_materials" name="Catalogs" sequence="5" parent="menu_bim_project_root"/>
+        <menuitem id="menu_bim_project_materials00" name="Bill of Materials" sequence="1" parent="menu_bim_project_materials" action="product_template_action_bim"/>
+        <menuitem id="menu_bim_project_materials01" name="Material Variants" sequence="2" parent="menu_bim_project_materials" action="stock_product_normal_bim_action"/>
+        <menuitem id="menu_bim_project_materials02" name="Bill of Manpower" sequence="3" parent="menu_bim_project_materials" action="product_manpower_action_bim"/>
+        <menuitem id="menu_bim_project_materials03" name="Bill of Equipments" sequence="4" parent="menu_bim_project_materials" action="stock_product_equipment_bim_action"/>
+        <menuitem id="menu_bim_project_materials04" name="Price Bank" sequence="5" parent="menu_bim_project_materials" action="product_template_action_bim"/>
 
         <menuitem id="menu_bim_project_edc" name="EDC" sequence="5" parent="menu_bim_project_root"/>
         <menuitem id="menu_bim_project_edc00" name="EDC" sequence="1" parent="menu_bim_project_edc" action="action_document_bim_space"/>
@@ -345,7 +461,12 @@
         <menuitem id="menu_bim_project_setting1" name="Project" sequence="1" parent="menu_bim_project_setting"/>
         <menuitem id="menu_bim_project_setting2" name="Quotations" sequence="2" parent="menu_bim_project_setting"/>
         <menuitem id="menu_bim_project_setting3" name="Purchases" sequence="3" parent="menu_bim_project_setting"/>
-        <menuitem id="menu_bim_project_setting104" name="Settings" sequence="1" parent="menu_bim_project_setting1" action="project_config_settings_bim_action"/>
+        <menuitem id="menu_bim_project_setting4" name="Inventory" sequence="4" parent="menu_bim_project_setting"/>
+        <menuitem id="menu_bim_project_setting5" name="Warehouse Management" sequence="5" parent="menu_bim_project_setting"/>
+        <menuitem id="menu_bim_project_setting6" name="Products" sequence="6" parent="menu_bim_project_setting"/>
+        <menuitem id="menu_bim_project_setting7" name="Units of Measures" sequence="7" parent="menu_bim_project_setting"/>
+
+        <menuitem id="menu_bim_project_setting04" name="Settings" sequence="1" parent="menu_bim_project_setting1" action="project_config_settings_bim_action"/>
         <menuitem id="menu_bim_project_setting100" name="Project Stage" sequence="2" parent="menu_bim_project_setting1" action="action_bim_project_project_stage"/>
         <menuitem id="menu_bim_project_setting101" name="Task Stage" sequence="3" parent="menu_bim_project_setting1" action="action_bim_project_task_type"/>
         <menuitem id="menu_bim_project_setting102" name="Project Tags" sequence="4" parent="menu_bim_project_setting1" action="action_bim_project_tags"/>
@@ -353,5 +474,14 @@
         <menuitem id="menu_bim_project_setting200" name="Settings" sequence="1" parent="menu_bim_project_setting2" action="action_sale_config_bim_settings"/>
         <menuitem id="menu_bim_project_setting201" name="Sales Team" sequence="2" parent="menu_bim_project_setting2" action="project_config_settings_crm_team"/>
         <menuitem id="menu_bim_project_setting300" name="Settings" sequence="1" parent="menu_bim_project_setting3" action="action_purchase_bim_configuration"/>
+        <menuitem id="menu_bim_project_setting400" name="Settings" sequence="1" parent="menu_bim_project_setting4" action="stock.action_stock_config_settings"/>
+        <menuitem id="menu_bim_project_setting501" name="Warehouses" sequence="1" parent="menu_bim_project_setting5" action="stock.action_warehouse_form"/>
+        <menuitem id="menu_bim_project_setting502" name="Operations Types" sequence="2" parent="menu_bim_project_setting5" action="stock.action_picking_type_list"/>
+        <menuitem id="menu_bim_project_setting503" name="Rules" sequence="3" parent="menu_bim_project_setting5" action="stock.action_rules_form"/>
+        <menuitem id="menu_bim_project_setting601" sequence="1" parent="menu_bim_project_setting6" action="product.product_category_action_form"/>
+        <menuitem id="menu_bim_project_setting602" sequence="2" parent="menu_bim_project_setting6" action="stock.action_orderpoint"/>
+        <menuitem id="menu_bim_project_setting603" sequence="3" parent="menu_bim_project_setting6" action="barcodes.action_barcode_nomenclature_form"/>
+        <menuitem id="menu_bim_project_setting701" sequence="1" parent="menu_bim_project_setting7" action="uom.product_uom_categ_form_action"/>
+        <menuitem id="menu_bim_project_setting702" sequence="2" parent="menu_bim_project_setting7" action="uom.product_uom_form_action"/>
     </data>
 </odoo>

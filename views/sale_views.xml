@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_order_form_inherit_sale_bim_project">
+            <field name="name">order.form.inherit.sale.bim.project</field>
+            <field name="inherit_id" ref="sale_project.view_order_form_inherit_sale_project"/>
+            <field name="model">sale.order</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='project_id']" position="attributes">
+                    <attribute name="attrs"></attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
