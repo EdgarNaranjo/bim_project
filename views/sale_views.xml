@@ -11,5 +11,98 @@
                 </xpath>
             </field>
         </record>
+
+        <!-- View Form resource.sale.bim -->
+        <record model="ir.ui.view" id="resource_sale_bim_form">
+            <field name="name">resource.sale.bim.form</field>
+            <field name="model">resource.sale.bim</field>
+            <field name="arch" type="xml">
+                <form string="Resources">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                            </group>
+                            <group>
+                                <field name="departure_id"/>
+                                <field name="chapter_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- View Tree resource.sale.bim -->
+        <record model="ir.ui.view" id="resource_sale_bim_tree">
+            <field name="name">resource.sale.bim.tree</field>
+            <field name="model">resource.sale.bim</field>
+            <field name="arch" type="xml">
+                <tree string="Resources">
+                    <field name="name"/>
+                    <field name="departure_id"/>
+                    <field name="chapter_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- View search resource.sale.bim -->
+        <record model="ir.ui.view" id="resource_sale_bim_search">
+            <field name="name">resource.sale.bim.search</field>
+            <field name="model">resource.sale.bim</field>
+            <field name="arch" type="xml">
+                <search string="Resources">
+                    <field name="name"/>
+                    <field name="departure_id"/>
+                    <field name="chapter_id"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_departure" string="Departures" domain="[]" context="{'group_by':'departure_id'}"/>
+                        <filter name="group_chapters" string="Chapters" domain="[]" context="{'group_by':'chapter_id'}"/>
+                    </group>
+                    <searchpanel view_types="tree,search">
+                        <field name="departure_id" icon="fa-building" enable_counters="1" expand="1" limit="1000"/>
+                        <field name="chapter_id" icon="fa-users" enable_counters="1"/>
+<!--                        <field name="department_id" icon="fa-users" enable_counters="1"/>-->
+                    </searchpanel>
+                </search>
+             </field>
+        </record>
+
+        <record id="action_resource_sale_bim" model="ir.actions.act_window">
+            <field name="name">Resources</field>
+            <field name="res_model">resource.sale.bim</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids"
+                   eval="[(5, 0, 0),
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('resource_sale_bim_tree')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('resource_sale_bim_form')})]"/>
+            <field name="search_view_id" ref="resource_sale_bim_search"/>
+        </record>
+
+
+        <!-- View search departure.sale.bim -->
+        <record model="ir.ui.view" id="departure_sale_bim_search">
+            <field name="name">departure.sale.bim.search</field>
+            <field name="model">departure.sale.bim</field>
+            <field name="arch" type="xml">
+                <search string="Departures">
+                    <field name="name"/>
+                    <field name="parent_id"/>
+                    <field name="child_id"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="group_parent" string="Parent" domain="[]" context="{'group_by':'parent_id'}"/>
+                        <filter name="group_child" string="Child" domain="[]" context="{'group_by':'child_id'}"/>
+                    </group>
+                    <searchpanel view_types="tree,search">
+                        <field name="parent_id" icon="fa-building" filter_domain="[('child_id', '!=', False)]"/>
+                    </searchpanel>
+                </search>
+             </field>
+        </record>
+
+        <menuitem id="menu_bim_project_sale01" name="Resources" sequence="2" parent="bim_project.menu_bim_project_sale" action="action_resource_sale_bim"/>
+
     </data>
 </odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="resource_resource_tree_view_bim_inherit2">
+            <field name="name">resource.resource.tree.view.bim.inherit2</field>
+            <field name="model">resource.resource</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="resource_type"/>
+                    <field name="resource_ids"/>
+                    <field name="color"  widget="color_picker"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="resource_resource_with_employee_form_view_bim_inherit2" model="ir.ui.view">
+            <field name="inherit_id" ref="planning.resource_resource_with_employee_form_view_inherit"/>
+            <field name="model">resource.resource</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='calendar_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//group[last()]" position="after">
+                    <field name="resource_ids" string="Calendar Work"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="planning_view_form_in_gantt_bim_inherit">
+            <field name="name">planning.view.form.in.gantt.bim.inherit</field>
+            <field name="inherit_id" ref="planning.planning_view_form_inherit"/>
+            <field name="model">planning.slot</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='role_id']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='sale_line_id']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='resource_id']" position="attributes">
+                    <attribute name="options">"{'no_create_edit': True, 'no_create': True}"</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

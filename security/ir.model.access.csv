@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+bim_project.access_cost_task_bim,access_cost_task_bim,bim_project.model_cost_task_bim,base.group_user,1,1,1,1
+bim_project.access_chapter_sale_bim,access_chapter_sale_bim,bim_project.model_chapter_sale_bim,base.group_user,1,1,1,1
+bim_project.access_departure_sale_bim,access_departure_sale_bim,bim_project.model_departure_sale_bim,base.group_user,1,1,1,1
+bim_project.access_resource_sale_bim,access_resource_sale_bim,bim_project.model_resource_sale_bim,base.group_user,1,1,1,1
+bim_project.access_bim_models_import,access_bim_models_import,bim_project.model_bim_models_import,base.group_user,1,1,1,1
+bim_project.access_item_cost_task_bim,access_item_cost_task_bim,bim_project.model_item_cost_task_bim,base.group_user,1,1,1,1

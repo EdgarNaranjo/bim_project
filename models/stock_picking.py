@@ -20,3 +20,14 @@ class Picking(models.Model):
                 if obj_purchase_ids:
                     for obj_purchase in obj_purchase_ids:
                         record.project_id = obj_purchase.project_id.id
+
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    resource_type = fields.Selection([
+        ('equipment', 'Equipment'),
+        ('material', 'Material'),
+        ('space', 'Spaces'),
+        ('user', 'Human'),
+        ('other', 'Others')], string='Type resource')
